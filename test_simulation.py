@@ -1,4 +1,5 @@
 import random
+import math
 arrive_table = [1, 2, 3, 5, 15]
 Service_table = [2.1, 3.3, 1.1, 0.5, 1.7]
 job_list = []
