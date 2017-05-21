@@ -1,41 +1,17 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Fri May 19 22:51:45 2017
-
-@author: sdawedsafa
-"""
-
 import random
 import math
+import matplotlib.pyplot as plt
 
-def main(nb_servers, index, Tend):
-# seed
-    a = 0
+def main(nb_servers,i,Tend):
     this = random.seed(10000)
-    #print(index)
-    index += 3000
-    # Accounting parameters
-    # nb_servers are how many servers on in each turn
-    # T is the cumulative response time
-    # N is number of completed customers at the end of the simulation
-    # and the mean response time will be T/N
-    #nb_servers = 7
     T = 0
     N = 0
-
-    # Due to limited power, each PS server would have limited power
-    # and for this, each PS server own a different frequency
     power = 2000 / nb_servers
     f = 1.25 + (0.31 * ((power / 200) - 1))
-
-    # mean arrival rate lambda with 7.2, beta with 0.86, alpha1 with 0.43 and alpha2 with 0.98
     Lambda = 7.2
     beta = 0.86
     alpha1 = 0.43
     alpha2 = 0.98
-
-
     # Here gt is the probability density function of the service time t devide by f
     # The probability density function is derived function of service_time on range(alpha1, alpha2)
     # Hence here, we calculate the service_time replace with alpha2 and the low limit set to be alpha1, the
@@ -73,11 +49,12 @@ def main(nb_servers, index, Tend):
     # Job list will record each time`s job with type of list contain[master_clock, depature_time]
     # Initial departure time is Infinite
     master_clock = 0
-    #Tend = 10000
     job_list = []
     next_arrival_time = arrival()
     next_departure_time = float('Inf')
     service_time = service_t()
+    mean_res = []
+    total_time = []
     while(master_clock < Tend):
         
         if next_arrival_time < next_departure_time:
@@ -89,7 +66,6 @@ def main(nb_servers, index, Tend):
 
         # temp is to temporary record the master clock
         temp = master_clock
-
         master_clock = next_event_time
         # gap is for next event`s master clock
         gap = master_clock - temp
@@ -103,21 +79,18 @@ def main(nb_servers, index, Tend):
             # add new event to list and its service time
             job_list.append([master_clock, service_time])
             last_time_phrase = find_min(job_list)[1]
-            next_departure_time = master_clock + len(job_list) * last_time_phrase
+            next_departure_time = master_clock + \
+                len(job_list) * last_time_phrase
             next_arrival_time = master_clock
             # calculate next arrivel time with product of a1k and a2k
             for i in range(nb_servers):
                 next_arrival_time += (- math.log(1 - random.random()) / Lambda) * random.uniform(0.75, 1.17)
                 service_time = service_t()
-
-        # Departure event
         else:
-            # find out the minimal
             min_phrase = find_min(job_list)
-            # count how many same time departure phrase
             count = 0
-            # save same time job to temp list
             temp = []
+            index1 = 60000
             for j in job_list:
                 if j[1] == min_phrase[1]:
                     temp.append([j[0], j[1]])
@@ -127,25 +100,20 @@ def main(nb_servers, index, Tend):
                 job_list.remove(k)
                 T = T + master_clock - variance
                 N = N + 1
-                if(a == index):
-                    #print(a)
-                    return T / N
-                else:
-                    
-                    a += 1
-                    #print(a)
-
-            # if empty list, halt the loop by set next_departure_time to infinite
+                #print(master_clock - variance)
+                total_time.append(T)
+                mean_res.append(T/N)
             if len(job_list) == 0:
                 next_departure_time = float('Inf')
-            # else, each job in list should minus time past, then set departure time to new time
             else:
                 for m in job_list:
                     m[1] = m[1] - gap / (len(job_list) + count)
                     last_time_phrase = find_min(job_list)[1]
                 next_departure_time = master_clock + len(job_list) * last_time_phrase
-
-
-    # Test main function, modify output text and target
-        #print('Number_of_running_servers:', nb_servers)
-        #return T / N
+    job_num = []
+    #print('Number_of_running_servers:', nb_servers)
+    #print('Response time:', T / N)
+    return T / N
+    #plt.plot()
+    
+    #plt.show()
